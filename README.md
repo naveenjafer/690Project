@@ -8,3 +8,7 @@ Please do the following to be able to run our code.
 2. Set python path for successful imports
 `export PYTHONPATH='.'`
 
+# Running the simulation
+As of now, creating a network with a configurable set of parameters is done. The actual simulation needs to be done. Run the following to create the network.
+
+`python3 src/main/simulation/simulator_main.py`
