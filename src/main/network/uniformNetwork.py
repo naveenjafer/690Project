@@ -3,7 +3,8 @@ import json
 import os
 from platform import node
 import sys
-from src.main.utils.constants import consts
+import src.main.utils.constants as consts
+
 import random
 import numpy as np
 import datetime
@@ -31,7 +32,7 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
         cat_0_weight = 0.5
         cat_1_weight = 0.5
 
-        if nodeMap[nodeIndex]["polInc"] == consts["inclinations"][0]:
+        if nodeMap[nodeIndex]["polInc"] == consts.INCLINATIONS[0]:
             cat_0_weight += homophilyIndex*0.5
             cat_1_weight -= homophilyIndex*0.5
         
@@ -51,13 +52,13 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
     writeNodeMapToDisk(nodeMap)
     
 def writeNodeMapToDisk(nodeMap):
-    if not os.path.exists(consts["dataFolder"]):
-        os.mkdir(consts["dataFolder"])
+    if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
+        os.mkdir(consts.DATA_SIMULATION_FOLDER)
 
     datestring = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    os.mkdir(os.path.join(consts["dataFolder"], datestring))
+    os.mkdir(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring))
 
-    with open(os.path.join(consts["dataFolder"], datestring, consts["networkOriginFileName"]), "w") as f:
+    with open(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME), "w") as f:
         json.dump(nodeMap, f, indent=4)
 
 
@@ -69,10 +70,10 @@ def politicalInclinationSampler(nodeMap, skew=0.5):
     inclination_1_users = list(set(nodeList) - set(inclination_0_users))
 
     for node in inclination_0_users:
-        nodeMap[node]["polInc"] = consts["inclinations"][0]
+        nodeMap[node]["polInc"] = consts.INCLINATIONS[0]
 
     for node in inclination_1_users:
-        nodeMap[node]["polInc"] = consts["inclinations"][1]
+        nodeMap[node]["polInc"] = consts.INCLINATIONS[1]
 
     return nodeMap, inclination_0_users, inclination_1_users
 

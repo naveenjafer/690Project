@@ -3,17 +3,18 @@
 import json
 import os
 import sys
-from src.main.utils.constants import config_consts, consts
+
+import src.main.utils.constants as consts
 
 from src.main.network.uniformNetwork import generateNetwork
 
 def networkCreator():
     generateNetwork(
-        config_consts["homophilyIndex"], 
-        config_consts["nodeCount"], 
-        config_consts["edgeCountMean"],
-        config_consts["edgeCountVar"])
-
+        consts.HOMOPHILY_INDEX,
+        consts.NODE_COUNT,
+        consts.EDGE_COUNT_MEAN,
+        consts.EDGE_COUNT_VAR
+    )
 
 if __name__ == "__main__":
     networkCreator()

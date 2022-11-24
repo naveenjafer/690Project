@@ -1,12 +1,9 @@
-consts = {
-    "inclinations" : [-1,1],
-    "networkOriginFileName" : "startOfNetwork.json",
-    "dataFolder" : "data"
-}
+INCLINATIONS = [-1,1]
+NETWORK_ORIGINAL_FILENAME = "startOfNetwork.json"
+DATA_SIMULATION_FOLDER = "data_simulation"
 
-config_consts = {
-    "homophilyIndex" : 0.5,
-    "nodeCount" : 500,
-    "edgeCountMean" : 50,
-    "edgeCountVar" : 10
-}
+# config constants
+HOMOPHILY_INDEX = 0.5
+NODE_COUNT = 500
+EDGE_COUNT_MEAN = 50
+EDGE_COUNT_VAR = 10
