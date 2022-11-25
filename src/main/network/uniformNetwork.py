@@ -49,7 +49,7 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
         
         nodeMap[nodeIndex]["following"] = pol_cat_0_users_following + pol_cat_1_users_following
 
-    writeNodeMapToDisk(nodeMap)
+    return writeNodeMapToDisk(nodeMap)
     
 def writeNodeMapToDisk(nodeMap):
     if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
@@ -60,6 +60,7 @@ def writeNodeMapToDisk(nodeMap):
 
     with open(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME), "w") as f:
         json.dump(nodeMap, f, indent=4)
+    return os.path.join(consts.DATA_SIMULATION_FOLDER, datestring)
 
 
 def politicalInclinationSampler(nodeMap, skew=0.5):
