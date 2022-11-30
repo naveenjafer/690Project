@@ -19,5 +19,7 @@ ARTICLE_ATTRACTIVENESS_VAR = 0.1
 
 ARTICLE_COUNT = 3000 # this corresponds to the number of rounds which the article will go through.
 
+ARTICLE_SAMPLER_COUNT = 10
+
 #user level constants
 

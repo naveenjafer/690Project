@@ -29,13 +29,19 @@ def generateArticles(
             low=article_polarity_range[0],
             upp=article_polarity_range[1]
         )
+
+    political_inclination = [random.sample(consts.INCLINATIONS,1)[0] for i in range(article_count)]
     
+
     attractiveness_values = attractiveness_norm.rvs(article_count)
     polarity_values = polarity_norm.rvs(article_count)
 
     article_list = list()
     for index in range(article_count):
-        article_list.append([attractiveness_values[index], polarity_values[index]])
+        article_list.append({
+            "attractiveness" : attractiveness_values[index], 
+            "polarity" : polarity_values[index], 
+            "political_inclination" : political_inclination[index]})
 
     with open(os.path.join(networkFolder, consts.ARTICLES_FILENAME), "w") as f:
         json.dump(article_list, f, indent=4)

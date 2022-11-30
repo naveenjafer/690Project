@@ -60,7 +60,7 @@ def writeNodeMapToDisk(nodeMap):
 
     with open(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME), "w") as f:
         json.dump(nodeMap, f, indent=4)
-    return os.path.join(consts.DATA_SIMULATION_FOLDER, datestring)
+    return os.path.join(consts.DATA_SIMULATION_FOLDER, datestring), nodeMap
 
 
 def politicalInclinationSampler(nodeMap, skew=0.5):

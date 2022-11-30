@@ -10,7 +10,7 @@ from src.main.network.uniformNetwork import generateNetwork
 from src.main.newsArticles.articleGenerator import generateArticles
 
 def networkCreator():
-    networkFolder = generateNetwork(
+    networkFolder, nodeMap = generateNetwork(
         consts.HOMOPHILY_INDEX,
         consts.NODE_COUNT,
         consts.EDGE_COUNT_MEAN,
@@ -27,6 +27,8 @@ def networkCreator():
         consts.ARTICLE_COUNT,
         networkFolder
     )
+
+    
 
 if __name__ == "__main__":
     networkCreator()
