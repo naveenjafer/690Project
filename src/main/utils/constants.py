@@ -1,12 +1,12 @@
 INCLINATIONS = [-1,1]
-NETWORK_ORIGINAL_FILENAME = "startOfNetwork.json"
+NETWORK_ORIGINAL_FILENAME = "startOfNetwork.gml"
 DATA_SIMULATION_FOLDER = "data_simulation"
 ARTICLES_FILENAME = "articlesInfo.json"
 # config constants
-HOMOPHILY_INDEX = 0.5
-NODE_COUNT = 500
-EDGE_COUNT_MEAN = 50
-EDGE_COUNT_VAR = 10
+HOMOPHILY_INDEX = 0.9
+NODE_COUNT = 10
+EDGE_COUNT_MEAN = 3
+EDGE_COUNT_VAR = 2
 
 #article level constants
 ARTICLE_POLARITY_RANGE = [0.5,1]
@@ -20,4 +20,4 @@ ARTICLE_ATTRACTIVENESS_VAR = 0.1
 ARTICLE_COUNT = 3000 # this corresponds to the number of rounds which the article will go through.
 
 #user level constants
-
+COLOR_MAP = {-1: 'blue', 1: 'red'}
