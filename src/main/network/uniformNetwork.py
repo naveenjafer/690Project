@@ -8,6 +8,8 @@ import src.main.utils.constants as consts
 import random
 import numpy as np
 import datetime
+import networkx as nx
+
 
 def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
 
@@ -20,10 +22,10 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
     }
 
     edgeCountPerNode = np.random.normal(edgeCountMean, edgeCountVar, nodeCount)
-
+    print("Edge count per node", edgeCountPerNode)
     nodeMap = {k:{"polInc" : 0, "following" : [], "activated" : False} for k in range(nodeCount)}
     nodeMap, pol_cat_0_users, pol_cat_1_users = politicalInclinationSampler(nodeMap)
-
+    G = nx.DiGraph()
     print("[INFO] Assigned political identities")
     # to do, for each user, use the corresponding entry from edgeCountPerNode to follow other users
     for nodeIndex in range(nodeCount):
@@ -48,18 +50,19 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
             # need to add the condition to make sure that the count is exact, will not affect results much at the moment.
         
         nodeMap[nodeIndex]["following"] = pol_cat_0_users_following + pol_cat_1_users_following
-
-    return writeNodeMapToDisk(nodeMap)
+        G.add_node(nodeIndex, polInc=nodeMap[nodeIndex]["polInc"], activated=False)
+        G.add_edges_from([(nodeIndex,node) for node in nodeMap[nodeIndex]["following"]])
+    return writeNodeMapToDisk(G)
     
-def writeNodeMapToDisk(nodeMap):
+
+def writeNodeMapToDisk(node_graph):
     if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
         os.mkdir(consts.DATA_SIMULATION_FOLDER)
 
     datestring = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     os.mkdir(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring))
-
-    with open(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME), "w") as f:
-        json.dump(nodeMap, f, indent=4)
+    node_graph_path = os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME)
+    nx.write_gml(node_graph, node_graph_path)
     return os.path.join(consts.DATA_SIMULATION_FOLDER, datestring)
 
 
