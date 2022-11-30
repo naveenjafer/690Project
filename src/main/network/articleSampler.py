@@ -14,7 +14,7 @@ def randomSampler(nodeMap, article_list):
     # if article["political_inclination"] it could be a neutral article and should be allowed to be sampled by both groups. 
 
     
-    for article in article_list:
-        if article["political_inclination"] ==
+    '''for article in article_list:
+        if article["political_inclination"] =='''
 
     consts.ARTICLE_SAMPLER_COUNT
