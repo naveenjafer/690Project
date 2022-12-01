@@ -8,6 +8,9 @@ import src.main.utils.constants as consts
 
 from src.main.network.uniformNetwork import generateNetwork
 from src.main.newsArticles.articleGenerator import generateArticles
+from src.main.network.articleSampler import randomArticleSampler
+from src.main.simulation.simulate_rounds import roundsSimulator
+from src.main.analysis.endOfRoundAnalysis import analyzeHistograms
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -19,7 +22,7 @@ def networkCreator():
         consts.EDGE_COUNT_VAR
     )
     
-    article_list = generateArticles(
+    articleList = generateArticles(
         consts.ARTICLE_ATTRACTIVENESS_RANGE,
         consts.ARTICLE_ATTRACTIVENESS_MEAN,
         consts.ARTICLE_ATTRACTIVENESS_VAR,
@@ -29,7 +32,20 @@ def networkCreator():
         consts.ARTICLE_COUNT,
         networkFolder
     )
-    return networkFolder, article_list
+
+    samplers = randomArticleSampler(nodeGraph, articleList)
+
+    activationStats = roundsSimulator(
+        nodeGraph,
+        articleList,
+        samplers
+    )
+
+    analyzeHistograms(activationStats)
+
+    #print(list(nodeGraph.nodes(data=True)))
+    
+    return networkFolder, articleList
 
 def visualize_network(network_path):
     G = nx.read_gml(network_path)
@@ -41,4 +57,4 @@ def visualize_network(network_path):
 if __name__ == "__main__":
     networkFolder,  article_list = networkCreator()
     # visualize graph
-    visualize_network(os.path.join(networkFolder, consts.NETWORK_ORIGINAL_FILENAME))
+    #visualize_network(os.path.join(networkFolder, consts.NETWORK_ORIGINAL_FILENAME))
