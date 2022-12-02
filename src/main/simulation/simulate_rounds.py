@@ -83,7 +83,7 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         # after completion of a round, glean insights to track and plot stats
 
         articleLevelStats = {}
-        articleLevelStats["initialActive"] = len(samplers)
+        articleLevelStats["initialActive"] = len(samplers[index])
         articleLevelStats["attractiveness"] = article["attractiveness"]
         articleLevelStats["polarity"] = article["polarity"]
         articleLevelStats["political_inclination"] = article["political_inclination"]
@@ -103,7 +103,7 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                     activeCongruentFinal += 1
                 else:
                     activeNonCongruentFinal += 1
-        
+        #print(activeCongruentFinal, activeNonCongruentFinal)
         activeCounter = activeCongruentFinal + activeNonCongruentFinal
         articleLevelStats["endOfRoundStats"] = {}
         articleLevelStats["endOfRoundStats"]["activeCongruentInitial"] = activeCongruentInitial

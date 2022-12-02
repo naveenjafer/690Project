@@ -15,6 +15,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 def networkCreator():
+    # generate network
     networkFolder, nodeGraph = generateNetwork(
         consts.HOMOPHILY_INDEX,
         consts.NODE_COUNT,
@@ -41,10 +42,7 @@ def networkCreator():
         samplers
     )
 
-    analyzeHistograms(activationStats)
-
-    #print(list(nodeGraph.nodes(data=True)))
-    
+    analyzeHistograms(activationStats)    
     return networkFolder, articleList
 
 def visualize_network(network_path):
@@ -57,4 +55,4 @@ def visualize_network(network_path):
 if __name__ == "__main__":
     networkFolder,  article_list = networkCreator()
     # visualize graph
-    #visualize_network(os.path.join(networkFolder, consts.NETWORK_ORIGINAL_FILENAME))
+    visualize_network(os.path.join(networkFolder, consts.NETWORK_ORIGINAL_FILENAME))
