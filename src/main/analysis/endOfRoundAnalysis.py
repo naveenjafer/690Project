@@ -17,7 +17,7 @@ def convertToPandasDF(activationStats):
     return pd.DataFrame(activationStatsCopy)
 
 def plotHistograms(xLabel, yLabel, activationStatsDF):
-    sns.histplot(activationStatsDF, x="polarity", y="activeCounter")
+    sns.histplot(activationStatsDF, x="polarity", y="activeCounter", cbar=True)
     plt.show()
 
 

@@ -22,7 +22,14 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
         "edgeCountVar" : edgeCountVar
     }
 
-    edgeCountPerNode = np.random.normal(edgeCountMean, edgeCountVar, nodeCount)
+    edgeCountPerNode_norm = get_truncated_normal(
+            mean=consts.EDGE_COUNT_MEAN,
+            sd=consts.EDGE_COUNT_VAR ** 0.5,
+            low=consts.EDGE_COUNT_LOWER_BOUND,
+            upp=consts.EDGE_COUNT_UPPER_BOUND
+        )
+    edgeCountPerNode = edgeCountPerNode_norm.rvs(nodeCount)
+    #edgeCountPerNode = np.random.normal(edgeCountMean, edgeCountVar, nodeCount)
     print("Edge count per node", edgeCountPerNode)
 
     nodeMap = {k:{"polInc" : 0, "following" : [], "activated" : False} for k in range(nodeCount)}
