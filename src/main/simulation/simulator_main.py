@@ -8,7 +8,7 @@ import src.main.utils.constants as consts
 
 from src.main.network.uniformNetwork import generateNetwork
 from src.main.newsArticles.articleGenerator import generateArticles
-from src.main.network.articleSampler import randomArticleSampler
+from src.main.network.articleSampler import sameInclinationSampler, staggeredInclinationSampler
 from src.main.simulation.simulate_rounds import roundsSimulator
 from src.main.analysis.endOfRoundAnalysis import analyzeHistograms
 import networkx as nx
@@ -34,7 +34,7 @@ def networkCreator():
         networkFolder
     )
 
-    samplers = randomArticleSampler(nodeGraph, articleList)
+    samplers = staggeredInclinationSampler(nodeGraph, articleList)
 
     activationStats = roundsSimulator(
         nodeGraph,

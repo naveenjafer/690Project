@@ -1,6 +1,7 @@
 import networkx as nx
 import copy
 import src.main.utils.constants as consts
+from src.main.utils.helpers import get_truncated_normal
 
 def roundsSimulator(nodeGraph, articleList, samplers):
 
@@ -29,7 +30,10 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         while True:
             newActivations = 0
             for nodeIndex in range(consts.NODE_COUNT):
-
+                activationStateGetter = nx.get_node_attributes(nodeGraphRound, "activated")   
+                if activationStateGetter[nodeIndex] == True:
+                    # the node is already activated
+                    continue
                 P_a = None # comes from article
                 P_n = None # comes from user user interaction
                 P_p = None # comes from article user interaction
@@ -37,37 +41,11 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                 P_a = article["attractiveness"]
 
                 # start of calculating P_n 
-                activationStateGetter = nx.get_node_attributes(nodeGraphRound, "activated")
-                
-                if activationStateGetter[nodeIndex] == True:
-                    # the node is already activated
-                    continue
-                
-                followingNodes = nodeGraphRound.neighbors(nodeIndex)
-                nodePoliticalInc = polIncGetter[nodeIndex]
-
-                countCongActive, countNonCongActive, countCong, countNonCong = 0,0,0,0
-
-                for followingNodeIndex in followingNodes:
-                    if polIncGetter[followingNodeIndex] == nodePoliticalInc:
-                        countCong += 1
-                        if activationStateGetter[followingNodeIndex] == True:
-                            countCongActive += 1
-                    
-                    else:
-                        countNonCong += 1
-                        if activationStateGetter[followingNodeIndex] == True:
-                            countNonCongActive += 1
-
-                P_n = ((countCongActive * weightageCongruentGetter[followingNodeIndex]) + (countNonCongActive * weightageNonCongruentGetter[followingNodeIndex])) / ((countCong * weightageCongruentGetter[followingNodeIndex]) + (countNonCong * weightageNonCongruentGetter[followingNodeIndex]))
-
+                P_n = calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter)
                 # end of calculating P_n
 
                 # start of calculating P_p
-                if article["political_inclination"] == polIncGetter[nodeIndex]:
-                    P_p = article["polarity"]
-                else:
-                    P_p = 1-article["polarity"]
+                P_p = calculate_p_p_mode_2(article, polIncGetter, nodeIndex)
                 # end of calculating P_p
 
                 if P_a * P_n * P_p > thresholdAlphaGetter[nodeIndex]:
@@ -88,7 +66,7 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         articleLevelStats["polarity"] = article["polarity"]
         articleLevelStats["political_inclination"] = article["political_inclination"]
 
-        # prettu much just collating information for easy analysis.
+        # pretty much just collating information for easy analysis.
 
         activationStateGetter = nx.get_node_attributes(nodeGraphRound, "activated")
         activeCounter = 0
@@ -119,5 +97,56 @@ def getStaticAttributeGetters(nodeGraph):
     weightageCongruentGetter = nx.get_node_attributes(nodeGraph, 'weightageCongruent')
     weightageNonCongruentGetter = nx.get_node_attributes(nodeGraph, 'weightageNonCongruent')
     thresholdAlphaGetter = nx.get_node_attributes(nodeGraph, 'thresholdAlpha')
-
     return polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter, thresholdAlphaGetter
+
+def calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter):
+            
+      
+    followingNodes = nodeGraphRound.neighbors(nodeIndex)
+    nodePoliticalInc = polIncGetter[nodeIndex]
+
+    countCongActive, countNonCongActive, countCong, countNonCong = 0,0,0,0
+
+    for followingNodeIndex in followingNodes:
+        if polIncGetter[followingNodeIndex] == nodePoliticalInc:
+            countCong += 1
+            if activationStateGetter[followingNodeIndex] == True:
+                countCongActive += 1
+        
+        else:
+            countNonCong += 1
+            if activationStateGetter[followingNodeIndex] == True:
+                countNonCongActive += 1
+
+    P_n = ((countCongActive * weightageCongruentGetter[followingNodeIndex]) + (countNonCongActive * weightageNonCongruentGetter[followingNodeIndex])) / ((countCong * weightageCongruentGetter[followingNodeIndex]) + (countNonCong * weightageNonCongruentGetter[followingNodeIndex]))
+    return P_n
+
+def calculate_p_p_mode_1(article, polIncGetter, nodeIndex):
+    if article["political_inclination"] == polIncGetter[nodeIndex]:
+        P_p = article["polarity"]
+    else:
+        P_p = 1-article["polarity"]
+    return P_p
+
+def calculate_p_p_mode_2(article, polIncGetter, nodeIndex):
+    article_polarity_gap = article["polarity"] - (1 - article["polarity"])
+    article_polarity_gap_offsetted = article_polarity_gap * consts.USER_ARTICLE_OFFSET_FACTOR
+    
+    if article["political_inclination"] == polIncGetter[nodeIndex]:
+        P_p_mean = article["polarity"] - article_polarity_gap_offsetted
+        lowerBound = 0.5
+        upperBound = 1
+    else:
+        P_p_mean = 1-article["polarity"] + article_polarity_gap_offsetted
+        upperBound = 0.5
+        lowerBound = 0
+    
+    articleUser_norm = get_truncated_normal(
+            mean=P_p_mean,
+            sd=consts.USER_ARTICLE_VAR ** 0.5,
+            low=lowerBound,
+            upp=upperBound
+        )
+    P_p = articleUser_norm.rvs(1)[0]
+    return P_p
+
