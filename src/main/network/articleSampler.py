@@ -25,6 +25,10 @@ def sameInclinationSampler(nodeGraph, articleList):
     return samplerNodesList
 
 def staggeredInclinationSampler(nodeGraph, articleList):
+    # this function samples initial spreaders from both congruent and nonCongruent. 
+    # For articles with low polarity the chances of being sampled by a nonCongruent should not be drastically lower than congruent
+    # for articles with high polarity the chances of being sampled by congruent should be much higher than nonCongruent
+    
     samplerNodesList = []
     nodeList = list(nodeGraph.nodes(data=True))
 
