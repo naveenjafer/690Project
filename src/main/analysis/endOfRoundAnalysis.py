@@ -8,13 +8,13 @@ def analyzeHistograms(activationStats):
     activationStatsDF = convertToPandasDF(activationStats)
     plotHistograms("polarity", "activeCounter", activationStatsDF)
 
-def analyzeHistogramsAggregated(activationStatsAll):
+def analyzeHistogramsAggregated(activationStatsAll, runBaseFolder):
     allDFs = []
     for activationStat in activationStatsAll:
         activationStatsDF = convertToPandasDF(activationStat)
         allDFs.append(activationStatsDF)
     activationStatsDFAll = pd.concat(allDFs)
-    plotHistograms("polarity", "activeCounter", activationStatsDFAll)
+    plotHistograms("polarity", "activeCounter", activationStatsDFAll, runBaseFolder)
 
 def convertToPandasDF(activationStats):
     activationStatsCopy = copy.deepcopy(activationStats)
@@ -26,8 +26,10 @@ def convertToPandasDF(activationStats):
 
 
 
-def plotHistograms(xLabel, yLabel, activationStatsDF):
+def plotHistograms(xLabel, yLabel, activationStatsDF, runBaseFolder):
     sns.histplot(activationStatsDF, x=xLabel, y=yLabel, kde = True, cbar=True, pthresh=0.1)
+    plt.title(f"Heatmap of {xLabel} vs {yLabel} averaged across runs")
     plt.show()
+    plt.savefig(os.path.join(runBaseFolder))
 
 

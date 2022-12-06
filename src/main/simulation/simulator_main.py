@@ -63,7 +63,7 @@ def networkCreator():
         activationStatsAll.append(activationStats)
     
     #analyzeHistograms(activationStatsAll[0])
-    analyzeHistogramsAggregated(activationStatsAll)   
+    analyzeHistogramsAggregated(activationStatsAll, os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))   
     return networkFolder, articleList
 
 
