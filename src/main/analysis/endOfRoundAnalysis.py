@@ -7,9 +7,10 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def drawWeightedCounterGraph(activationStatsDF, base_col, analysis_col, axs):
-    total_polarity_bins, bin_start, bin_end, bin_iterator =20, 0, 1, 0.5
+    total_polarity_bins, bin_start, bin_end = 20, 0, 1
     if base_col == 'polarity':
         bin_start = 0.5
+    bin_iterator = bin_start
     polarity_bin_len = (bin_end-bin_start)/total_polarity_bins
     bins = []
     bin_col = base_col + '_bins'
