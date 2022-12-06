@@ -12,7 +12,7 @@ import datetime
 import networkx as nx
 
 
-def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
+def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar, dateString, runNumber):
 
     #homophilyIndex = 0 for a mixture and 1 for a fully homophilic network
     networkConfig = {
@@ -78,18 +78,21 @@ def generateNetwork(homophilyIndex, nodeCount, edgeCountMean, edgeCountVar):
             thresholdAlpha = nodeMap[nodeIndex]["thresholdAlpha"]
         )
         G.add_edges_from([(nodeIndex,node) for node in nodeMap[nodeIndex]["following"]])
-    return writeNodeMapToDisk(G)
+    return writeNodeMapToDisk(G, dateString, runNumber)
     
 
-def writeNodeMapToDisk(node_graph):
+def writeNodeMapToDisk(node_graph, dateString, runNumber):
     if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
         os.mkdir(consts.DATA_SIMULATION_FOLDER)
 
-    datestring = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-    os.mkdir(os.path.join(consts.DATA_SIMULATION_FOLDER, datestring))
-    node_graph_path = os.path.join(consts.DATA_SIMULATION_FOLDER, datestring, consts.NETWORK_ORIGINAL_FILENAME)
+    
+    if not os.path.exists(os.path.join(consts.DATA_SIMULATION_FOLDER, dateString)):
+        os.mkdir(os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
+    os.mkdir(os.path.join(consts.DATA_SIMULATION_FOLDER, dateString, str(runNumber)))
+
+    node_graph_path = os.path.join(consts.DATA_SIMULATION_FOLDER, dateString, str(runNumber), consts.NETWORK_ORIGINAL_FILENAME)
     nx.write_gml(node_graph, node_graph_path)
-    return os.path.join(consts.DATA_SIMULATION_FOLDER, datestring), node_graph
+    return os.path.join(consts.DATA_SIMULATION_FOLDER, dateString, str(runNumber)), node_graph
 
 
 def politicalInclinationSampler(nodeMap, skew=0.5):

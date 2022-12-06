@@ -8,6 +8,14 @@ def analyzeHistograms(activationStats):
     activationStatsDF = convertToPandasDF(activationStats)
     plotHistograms("polarity", "activeCounter", activationStatsDF)
 
+def analyzeHistogramsAggregated(activationStatsAll):
+    allDFs = []
+    for activationStat in activationStatsAll:
+        activationStatsDF = convertToPandasDF(activationStat)
+        allDFs.append(activationStatsDF)
+    activationStatsDFAll = pd.concat(allDFs)
+    plotHistograms("polarity", "activeCounter", activationStatsDFAll)
+
 def convertToPandasDF(activationStats):
     activationStatsCopy = copy.deepcopy(activationStats)
     for item in activationStatsCopy:
@@ -16,8 +24,10 @@ def convertToPandasDF(activationStats):
         del item["endOfRoundStats"]
     return pd.DataFrame(activationStatsCopy)
 
+
+
 def plotHistograms(xLabel, yLabel, activationStatsDF):
-    sns.histplot(activationStatsDF, x="polarity", y="activeCounter", kde = True, cbar=True, pthresh=0.1)
+    sns.histplot(activationStatsDF, x=xLabel, y=yLabel, kde = True, cbar=True, pthresh=0.1)
     plt.show()
 
 
