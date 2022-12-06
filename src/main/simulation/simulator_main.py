@@ -19,7 +19,7 @@ NUMBER_OF_RUNS = 10
 
 def networkCreator():
     # generate network
-    dateString = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    dateString = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     config = [item for item in dir(consts) if not item.startswith("__")]
     if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
         os.mkdir(consts.DATA_SIMULATION_FOLDER)
@@ -63,7 +63,8 @@ def networkCreator():
         activationStatsAll.append(activationStats)
     
     #analyzeHistograms(activationStatsAll[0])
-    analyzeHistogramsAggregated(activationStatsAll, os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))   
+
+    analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
     return networkFolder, articleList
 
 
