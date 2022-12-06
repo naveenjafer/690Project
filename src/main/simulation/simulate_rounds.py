@@ -6,9 +6,8 @@ from src.main.utils.helpers import get_truncated_normal
 def roundsSimulator(nodeGraph, articleList, samplers):
 
     activationStats = []
+    p_a_avg, p_n_avg, p_p_avg, avgCounter = 0,0,0,0
 
-    print("samplers")
-    #print(samplers)
     polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter, thresholdAlphaGetter = getStaticAttributeGetters(nodeGraph)
     for index, article in enumerate(articleList):
         if index % 50 == 0:
@@ -34,19 +33,22 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                 if activationStateGetter[nodeIndex] == True:
                     # the node is already activated
                     continue
+                avgCounter += 1
                 P_a = None # comes from article
                 P_n = None # comes from user user interaction
                 P_p = None # comes from article user interaction
 
                 P_a = article["attractiveness"]
+                p_a_avg += P_a
 
                 # start of calculating P_n 
                 P_n = calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter)
                 # end of calculating P_n
-
+                p_n_avg += P_n
                 # start of calculating P_p
                 P_p = calculate_p_p_mode_2(article, polIncGetter, nodeIndex)
                 # end of calculating P_p
+                p_p_avg += P_p
 
                 if P_a * P_n * P_p > thresholdAlphaGetter[nodeIndex]:
                     nx.set_node_attributes(nodeGraphRound, {nodeIndex : True}, 'activated')
@@ -90,7 +92,9 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         articleLevelStats["endOfRoundStats"]["activeNonCongruentFinal"] = activeNonCongruentFinal
         articleLevelStats["endOfRoundStats"]["activeCounter"] = activeCounter
         activationStats.append(articleLevelStats)
-    return activationStats
+    p_a_avg, p_n_avg, p_p_avg = p_a_avg/avgCounter, p_n_avg/avgCounter, p_p_avg/avgCounter
+    p_avgs = [p_a_avg, p_n_avg, p_p_avg]
+    return activationStats, p_avgs
 
 def getStaticAttributeGetters(nodeGraph):
     polIncGetter = nx.get_node_attributes(nodeGraph, 'polInc')

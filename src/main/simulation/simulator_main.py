@@ -15,7 +15,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import datetime
 
-NUMBER_OF_RUNS = 10
+NUMBER_OF_RUNS = 1
 
 def networkCreator():
     # generate network
@@ -31,6 +31,7 @@ def networkCreator():
         json.dump(config, f, indent=4)
 
     activationStatsAll = []
+    p_avgsAll = []
     for i in range(NUMBER_OF_RUNS):
         print(f"************************ RUN {i} of {NUMBER_OF_RUNS}*********************")
         networkFolder, nodeGraph = generateNetwork(
@@ -55,13 +56,15 @@ def networkCreator():
 
         samplers = staggeredInclinationSampler(nodeGraph, articleList)
 
-        activationStats = roundsSimulator(
+        activationStats, p_avgs = roundsSimulator(
             nodeGraph,
             articleList,
             samplers
         )
+        p_avgsAll.append(p_avgs)
         activationStatsAll.append(activationStats)
-    
+    print("Averages")
+    print(p_avgsAll)
     #analyzeHistograms(activationStatsAll[0])
 
     analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))

@@ -6,8 +6,11 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
+#bins = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+
+
 def drawWeightedCounterGraph(activationStatsDF, base_col, analysis_col, axs):
-    total_polarity_bins, bin_start, bin_end, bin_iterator =20, 0, 1, 0.5
+    total_polarity_bins, bin_start, bin_end, bin_iterator = 20, 0, 1, 0.5
     if base_col == 'polarity':
         bin_start = 0.5
     polarity_bin_len = (bin_end-bin_start)/total_polarity_bins
@@ -45,12 +48,14 @@ def drawSubPlotsToShowActivationTrends(activationStatsDF, homiphily_index, runBa
     fig.suptitle(polarity_col+" VS "+analysis_col+" WITH Homophily Index - "+str(homiphily_index))
     plotHistograms(polarity_col, analysis_col, activationStatsDF, axs)
     drawWeightedCounterGraph(activationStatsDF, polarity_col, analysis_col, axs)
-    plt.show()
     plt.savefig(os.path.join(runBaseFolder, f"{polarity_col}_{analysis_col}.png"))
+    plt.show()
+    
 
 def analyzeHistograms(activationStats):
     activationStatsDF = convertToPandasDF(activationStats)
-    plotHistograms("polarity", "activeCounter", activationStatsDF)
+    fig, axs = plt.subplots(1, 2, figsize=(14,7))
+    plotHistograms("polarity", "activeCounter", activationStatsDF, axs)
 
 def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFolder):
     allDFs = []
@@ -58,13 +63,32 @@ def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFold
         activationStatsDF = convertToPandasDF(activationStat)
         allDFs.append(activationStatsDF)
     activationStatsDFAll = pd.concat(allDFs)
-    plotHistograms("polarity", "activeCounter", activationStatsDFAll, runBaseFolder)
+
+    plotHistogramsWithoutAxs("polarity", "activeCounter", activationStatsDFAll, runBaseFolder)
+    #plotHistogramsWithoutAxs("polarity", "activeCongruentFinal", activationStatsDFAll, runBaseFolder)
+    #plotHistogramsWithoutAxs("polarity", "activeNonCongruentFinal", activationStatsDFAll, runBaseFolder)
+
+    print("activationStatsDFAll head is")
+    print(activationStatsDFAll.head())
+    
+    activationStatsDFAllBinned = get_agg_results_for_attractive_articles(activationStatsDFAll)
+
+    print("activationStatsDFAllBinned's head is")
+    print(activationStatsDFAllBinned.head())
+
+
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCounter", runBaseFolder)
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCongruentFinal", runBaseFolder)
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeNonCongruentFinal", runBaseFolder)
+    
+    '''
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "polarity", "activeCounter")
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "attractiveness", "activeCounter")
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "polarity", "activeCongruentFinal")
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "polarity", "activeNonCongruentFinal")
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "attractiveness", "activeCongruentFinal")
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "attractiveness", "activeNonCongruentFinal")
+    '''
 
 def convertToPandasDF(activationStats):
     activationStatsCopy = copy.deepcopy(activationStats)
@@ -74,10 +98,44 @@ def convertToPandasDF(activationStats):
         del item["endOfRoundStats"]
     return pd.DataFrame(activationStatsCopy)
 
-def plotHistograms(xLabel, yLabel, activationStatsDF, axs, runBaseFolder):
+def plotHistograms(xLabel, yLabel, activationStatsDF, axs):
     sns.histplot(activationStatsDF, x=xLabel, y=yLabel, kde = True, cbar=True, pthresh=0.1, bins=20, ax=axs[0])
+    #plt.title(f"Heatmap of {xLabel} vs {yLabel} averaged across runs")
+    #plt.show()
+    #plt.savefig(os.path.join(runBaseFolder, "heatmap.png"))
+
+def plotHistogramsWithoutAxs(xLabel, yLabel, activationStatsDF, runBaseFolder):
+    sns.histplot(activationStatsDF, x=xLabel, y=yLabel, kde = True, cbar=True, pthresh=0.1, bins=20)
     plt.title(f"Heatmap of {xLabel} vs {yLabel} averaged across runs")
-    plt.show()
     plt.savefig(os.path.join(runBaseFolder, "heatmap.png"))
+    plt.show()
+    
+def get_agg_results_for_attractive_articles(df, attractiveness_factor = 0):
+    bins = []
+    bin_start, bin_end = 0,1
+    total_polarity_bins = 20
+    polarity_bin_len = (bin_end-bin_start)/total_polarity_bins
+    bin_iterator = 0.5
+    while bin_iterator<=bin_end:
+        bins.append(bin_iterator)
+        bin_iterator=round(bin_iterator+polarity_bin_len,3)
 
+    cat_df_attractive = df[df["attractiveness"] >= attractiveness_factor]
+    cat_df_attractive['bin_polarity'] = pd.cut(cat_df_attractive['polarity'], bins)
+    cat_df_grouped = cat_df_attractive.groupby(['bin_polarity'])
+    size_df_grouped = cat_df_grouped.size()
+    print("*****interest point******")
+    print(size_df_grouped)
+    cat_df_attractie_agg = cat_df_grouped.mean()
+    return cat_df_attractie_agg
 
+def compare_adoptions_by_homophily_index(activationStatsDFAllBinned, active_counter_category, runBaseFolder):
+    # plot lines
+    
+    plt.plot(activationStatsDFAllBinned["polarity"], activationStatsDFAllBinned[active_counter_category])
+    plt.title(f"polarity vs {active_counter_category}")
+    plt.xlabel("polarity")
+    plt.ylabel(active_counter_category)
+    plt.legend()
+    plt.savefig(os.path.join(runBaseFolder, f"polarity_{active_counter_category}.png"))
+    plt.show()
