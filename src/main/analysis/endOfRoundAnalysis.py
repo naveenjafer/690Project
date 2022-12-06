@@ -8,11 +8,16 @@ warnings.filterwarnings("ignore")
 
 #bins = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
-
+'''
 def drawWeightedCounterGraph(activationStatsDF, base_col, analysis_col, axs):
+<<<<<<< HEAD
     total_polarity_bins, bin_start, bin_end, bin_iterator = 20, 0, 1, 0.5
+=======
+    total_polarity_bins, bin_start, bin_end = 20, 0, 1
+>>>>>>> 339a6aab0869f3721b0deea9ee851e70c2577703
     if base_col == 'polarity':
         bin_start = 0.5
+    bin_iterator = bin_start
     polarity_bin_len = (bin_end-bin_start)/total_polarity_bins
     bins = []
     bin_col = base_col + '_bins'
@@ -43,6 +48,7 @@ def drawWeightedCounterGraph(activationStatsDF, base_col, analysis_col, axs):
     axs[1].set_xlabel(bin_col)
     axs[1].set_ylabel('Weighted Count of '+analysis_col)
 
+
 def drawSubPlotsToShowActivationTrends(activationStatsDF, homiphily_index, runBaseFolder, polarity_col, analysis_col):
     fig, axs = plt.subplots(1, 2, figsize=(14,7))
     fig.suptitle(polarity_col+" VS "+analysis_col+" WITH Homophily Index - "+str(homiphily_index))
@@ -50,7 +56,7 @@ def drawSubPlotsToShowActivationTrends(activationStatsDF, homiphily_index, runBa
     drawWeightedCounterGraph(activationStatsDF, polarity_col, analysis_col, axs)
     plt.savefig(os.path.join(runBaseFolder, f"{polarity_col}_{analysis_col}.png"))
     plt.show()
-    
+    '''
 
 def analyzeHistograms(activationStats):
     activationStatsDF = convertToPandasDF(activationStats)
