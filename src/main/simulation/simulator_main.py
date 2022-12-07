@@ -10,7 +10,7 @@ from src.main.network.uniformNetwork import generateNetwork
 from src.main.newsArticles.articleGenerator import generateArticles
 from src.main.network.articleSampler import sameInclinationSampler, staggeredInclinationSampler
 from src.main.simulation.simulate_rounds import roundsSimulator
-from src.main.analysis.endOfRoundAnalysis import analyzeHistograms, analyzeHistogramsAggregated  
+from src.main.analysis.endOfRoundAnalysis import analyzeHistograms, analyzeNetworkDynamics, analyzeHistogramsAggregated, plotBoxPlotOfActivations  
 import networkx as nx
 import matplotlib.pyplot as plt
 import datetime
@@ -20,7 +20,8 @@ NUMBER_OF_RUNS = 1
 def networkCreator():
     # generate network
     dateString = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
-    config = [item for item in dir(consts) if not item.startswith("__")]
+    #quit(1)
+    config = [[item, vars(consts)[item]] for item in dir(consts) if not item.startswith("__")]
     if not os.path.exists(consts.DATA_SIMULATION_FOLDER):
         os.mkdir(consts.DATA_SIMULATION_FOLDER)
     
@@ -31,7 +32,9 @@ def networkCreator():
         json.dump(config, f, indent=4)
 
     activationStatsAll = []
+    activationDynamicsStatsAll = []
     p_avgsAll = []
+    p_listsAll = []
     for i in range(NUMBER_OF_RUNS):
         print(f"************************ RUN {i} of {NUMBER_OF_RUNS}*********************")
         networkFolder, nodeGraph = generateNetwork(
@@ -56,18 +59,22 @@ def networkCreator():
 
         samplers = staggeredInclinationSampler(nodeGraph, articleList)
 
-        activationStats, p_avgs = roundsSimulator(
+        activationDynamicsStats, activationStats, p_avgs, p_lists  = roundsSimulator(
             nodeGraph,
             articleList,
             samplers
         )
         p_avgsAll.append(p_avgs)
+        p_listsAll += p_lists
         activationStatsAll.append(activationStats)
+        activationDynamicsStatsAll += activationDynamicsStats
     print("Averages")
     print(p_avgsAll)
+    plotBoxPlotOfActivations(p_listsAll)
     #analyzeHistograms(activationStatsAll[0])
 
-    analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
+    #analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
+    analyzeNetworkDynamics(activationDynamicsStatsAll, consts.HOMOPHILY_INDEX, os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
     return networkFolder, articleList
 
 

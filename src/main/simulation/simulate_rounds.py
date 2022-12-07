@@ -7,8 +7,9 @@ def roundsSimulator(nodeGraph, articleList, samplers):
 
     activationStats = []
     p_a_avg, p_n_avg, p_p_avg, avgCounter = 0,0,0,0
-
+    p_list = []
     polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter, thresholdAlphaGetter = getStaticAttributeGetters(nodeGraph)
+    activationDynamicsStats = []
     for index, article in enumerate(articleList):
         if index % 50 == 0:
             print("[SIMULATION-INFO]: Spreading Article ", index, " of ", len(articleList))
@@ -25,7 +26,9 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         nx.set_node_attributes(nodeGraphRound, nodeEditGraph, 'activated')
 
         roundsCounter = 0
-
+        activationsPerRound = []
+        numberOfActivations = len(samplers[index])
+        activationsPerRound.append(numberOfActivations)
         while True:
             newActivations = 0
             for nodeIndex in range(consts.NODE_COUNT):
@@ -46,19 +49,25 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                 # end of calculating P_n
                 p_n_avg += P_n
                 # start of calculating P_p
-                P_p = calculate_p_p_mode_2(article, polIncGetter, nodeIndex)
+                P_p = calculate_p_p_mode_1(article, polIncGetter, nodeIndex)
                 # end of calculating P_p
                 p_p_avg += P_p
+
+                p_list.append([P_a, P_p, P_n])
+             
 
                 if P_a * P_n * P_p > thresholdAlphaGetter[nodeIndex]:
                     nx.set_node_attributes(nodeGraphRound, {nodeIndex : True}, 'activated')
                     newActivations += 1
+                    numberOfActivations += 1
             roundsCounter += 1
-
+            
+            activationsPerRound.append(numberOfActivations)
             #print("[SIMULATION-INFO]: Activated ", newActivations, " nodes in round ", roundsCounter)
             if newActivations == 0:
                 # round is complete as there is equillibrium in the network, propogate the next article through network
                 break
+            
         
         # after completion of a round, glean insights to track and plot stats
 
@@ -67,6 +76,10 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         articleLevelStats["attractiveness"] = article["attractiveness"]
         articleLevelStats["polarity"] = article["polarity"]
         articleLevelStats["political_inclination"] = article["political_inclination"]
+
+        articleLevelStatsCopyForDynamics = copy.deepcopy(articleLevelStats) # copying this to avoid rewriting
+        articleLevelStatsCopyForDynamics["dynamics"] = activationsPerRound
+        activationDynamicsStats.append(articleLevelStatsCopyForDynamics) 
 
         # pretty much just collating information for easy analysis.
 
@@ -86,15 +99,18 @@ def roundsSimulator(nodeGraph, articleList, samplers):
         #print(activeCongruentFinal, activeNonCongruentFinal)
         activeCounter = activeCongruentFinal + activeNonCongruentFinal
         articleLevelStats["endOfRoundStats"] = {}
+        articleLevelStats["endOfRoundStats"]["roundsCounter"] = roundsCounter
         articleLevelStats["endOfRoundStats"]["activeCongruentInitial"] = activeCongruentInitial
         articleLevelStats["endOfRoundStats"]["activeNonCongruentInitial"] = activeNonCongruentInitial
         articleLevelStats["endOfRoundStats"]["activeCongruentFinal"] = activeCongruentFinal
         articleLevelStats["endOfRoundStats"]["activeNonCongruentFinal"] = activeNonCongruentFinal
         articleLevelStats["endOfRoundStats"]["activeCounter"] = activeCounter
+        articleLevelStats["endOfRoundStats"]["activationsPerRound"] = activeCounter/roundsCounter
         activationStats.append(articleLevelStats)
     p_a_avg, p_n_avg, p_p_avg = p_a_avg/avgCounter, p_n_avg/avgCounter, p_p_avg/avgCounter
     p_avgs = [p_a_avg, p_n_avg, p_p_avg]
-    return activationStats, p_avgs
+
+    return activationDynamicsStats, activationStats, p_avgs, p_list
 
 def getStaticAttributeGetters(nodeGraph):
     polIncGetter = nx.get_node_attributes(nodeGraph, 'polInc')

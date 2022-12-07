@@ -5,6 +5,7 @@ import copy
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
+import numpy as np
 
 #bins = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 
@@ -70,6 +71,8 @@ def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFold
         allDFs.append(activationStatsDF)
     activationStatsDFAll = pd.concat(allDFs)
 
+    activationStatsDFAll.to_csv(os.path.join(runBaseFolder, f"activationStatsDFAll_{homiphily_index}.csv"))
+
     plotHistogramsWithoutAxs("polarity", "activeCounter", activationStatsDFAll, runBaseFolder)
     #plotHistogramsWithoutAxs("polarity", "activeCongruentFinal", activationStatsDFAll, runBaseFolder)
     #plotHistogramsWithoutAxs("polarity", "activeNonCongruentFinal", activationStatsDFAll, runBaseFolder)
@@ -79,6 +82,8 @@ def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFold
     
     activationStatsDFAllBinned = get_agg_results_for_attractive_articles(activationStatsDFAll)
 
+    activationStatsDFAllBinned.to_csv(os.path.join(runBaseFolder, f"activationStatsDFAllBinned_{homiphily_index}.csv"))
+
     print("activationStatsDFAllBinned's head is")
     print(activationStatsDFAllBinned.head())
 
@@ -86,6 +91,8 @@ def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFold
     compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCounter", runBaseFolder)
     compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCongruentFinal", runBaseFolder)
     compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeNonCongruentFinal", runBaseFolder)
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "roundsCounter", runBaseFolder)
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activationsPerRound", runBaseFolder)
     
     '''
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "polarity", "activeCounter")
@@ -136,8 +143,6 @@ def get_agg_results_for_attractive_articles(df, attractiveness_factor = 0):
     return cat_df_attractie_agg
 
 def compare_adoptions_by_homophily_index(activationStatsDFAllBinned, active_counter_category, runBaseFolder):
-    # plot lines
-    
     plt.plot(activationStatsDFAllBinned["polarity"], activationStatsDFAllBinned[active_counter_category])
     plt.title(f"polarity vs {active_counter_category}")
     plt.xlabel("polarity")
@@ -145,3 +150,57 @@ def compare_adoptions_by_homophily_index(activationStatsDFAllBinned, active_coun
     plt.legend()
     plt.savefig(os.path.join(runBaseFolder, f"polarity_{active_counter_category}.png"))
     plt.show()
+
+def plotBoxPlotOfActivations(p_listsAll):
+    p_listsAll
+    p_listNew = []
+    for item in p_listsAll:
+        p_listNew.append([item[0], "p_a"])
+        p_listNew.append([item[1], "p_n"])
+        p_listNew.append([item[2], "p_p"])
+    p_listNewDF = pd.DataFrame(p_listNew, columns=["x", "y"])
+
+
+    sns.violinplot(data = p_listNewDF, x = "y", y = "x")
+    plt.show()
+
+def analyzeNetworkDynamics(activationDynamicsStatsAll, homiphily_index, runBaseFolder):
+    maxRounds = 0
+    for item in activationDynamicsStatsAll:
+        maxRounds = max(len(item["dynamics"]), maxRounds)
+    
+    for item in activationDynamicsStatsAll:
+        if len(item["dynamics"]) < maxRounds:
+            item["dynamics"] = item["dynamics"] + [item["dynamics"][-1]] * (maxRounds - len(item["dynamics"]))
+        item["dynamics"] = np.array(item["dynamics"])
+    #print(maxRounds)
+    binsForDynamics = [0.5, 0.6, 0.7, 0.8, 0.9, 1]
+    activationDynamicsStatsAll = pd.DataFrame(activationDynamicsStatsAll)
+
+    activationDynamicsStatsAll['bin_polarity'] = pd.cut(activationDynamicsStatsAll['polarity'], binsForDynamics)
+    activationDynamicsStatsAllGrouped = activationDynamicsStatsAll.groupby(['bin_polarity'])
+
+    ankitaVariable = activationDynamicsStatsAllGrouped["dynamics"].apply(np.array)
+    #print(ankitaVariable)
+    #print(np.vstack( ankitaVariable.iloc[0]))
+
+    ankitaVariable = ankitaVariable.apply(lambda x: np.vstack(x))
+    #print(ankitaVariable)
+    newVariable = ankitaVariable.apply(lambda x : np.mean(x, axis=0))
+    #print(type(newVariable))
+
+    for items in newVariable.iteritems():
+        #print(str(items[0]))
+        plt.plot(range(len(items[1])), items[1], label=str(items[0]))
+    
+    plt.xlabel("iterations")
+    plt.ylabel("number of active Nodes")
+    plt.title("Activation dynamics over iterations for different polarity values (diffusion trend)")
+    plt.legend()
+    plt.savefig(os.path.join(runBaseFolder, "activationDynamics.png"))
+    plt.show()
+    
+
+    
+    
+
