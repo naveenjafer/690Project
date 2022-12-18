@@ -45,7 +45,7 @@ def roundsSimulatorWeightedThreshold(nodeGraph, articleList, samplers):
                 p_a_avg += P_a
 
                 # start of calculating P_n 
-                P_n = calculate_p_n_without_congruency(activationStateGetter, nodeGraphRound, nodeIndex)
+                P_n = calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter)
                 # end of calculating P_n
                 p_n_avg += P_n
                 # start of calculating P_p
