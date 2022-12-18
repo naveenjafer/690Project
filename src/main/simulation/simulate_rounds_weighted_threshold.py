@@ -3,7 +3,7 @@ import copy
 import src.main.utils.constants as consts
 from src.main.utils.helpers import get_truncated_normal
 
-def roundsSimulator(nodeGraph, articleList, samplers):
+def roundsSimulatorWeightedThreshold(nodeGraph, articleList, samplers):
 
     activationStats = []
     p_a_avg, p_n_avg, p_p_avg, avgCounter = 0,0,0,0
@@ -45,18 +45,18 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                 p_a_avg += P_a
 
                 # start of calculating P_n 
-                P_n = calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter)
+                P_n = calculate_p_n_without_congruency(activationStateGetter, nodeGraphRound, nodeIndex)
                 # end of calculating P_n
                 p_n_avg += P_n
                 # start of calculating P_p
-                P_p = calculate_p_p_mode_2(article, polIncGetter, nodeIndex)
+                P_p = calculate_p_p_mode_1(article, polIncGetter, nodeIndex)
                 # end of calculating P_p
                 p_p_avg += P_p
 
                 p_list.append([P_a, P_p, P_n])
              
 
-                if P_a * P_n * P_p > thresholdAlphaGetter[nodeIndex]:
+                if  consts.WEIGHT_P_N * P_n + consts.WEIGHT_P_P * P_p > thresholdAlphaGetter[nodeIndex]:
                     nx.set_node_attributes(nodeGraphRound, {nodeIndex : True}, 'activated')
                     newActivations += 1
                     numberOfActivations += 1
@@ -139,6 +139,17 @@ def calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIn
                 countNonCongActive += 1
 
     P_n = ((countCongActive * weightageCongruentGetter[followingNodeIndex]) + (countNonCongActive * weightageNonCongruentGetter[followingNodeIndex])) / ((countCong * weightageCongruentGetter[followingNodeIndex]) + (countNonCong * weightageNonCongruentGetter[followingNodeIndex]))
+    return P_n
+
+def calculate_p_n_without_congruency(activationStateGetter, nodeGraphRound, nodeIndex):
+    followingNodes = nodeGraphRound.neighbors(nodeIndex)
+    countNbrsActive = 0
+    totalNbrs = 0
+    for followingNodeIndex in followingNodes:
+        if activationStateGetter[followingNodeIndex] == True:
+            countNbrsActive += 1
+        totalNbrs += 1
+    P_n = countNbrsActive / totalNbrs
     return P_n
 
 def calculate_p_p_mode_1(article, polIncGetter, nodeIndex):

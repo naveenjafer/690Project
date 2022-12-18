@@ -88,11 +88,11 @@ def analyzeHistogramsAggregated(activationStatsAll, homiphily_index, runBaseFold
     print(activationStatsDFAllBinned.head())
 
 
-    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCounter", runBaseFolder)
-    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCongruentFinal", runBaseFolder)
-    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeNonCongruentFinal", runBaseFolder)
-    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "roundsCounter", runBaseFolder)
-    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activationsPerRound", runBaseFolder)
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCounter", runBaseFolder, "# of Active Nodes")
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeCongruentFinal", runBaseFolder, "# of Congruent Active Nodes")
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activeNonCongruentFinal", runBaseFolder, "# of Non-Congruent Active Nodes")
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "roundsCounter", runBaseFolder, "# of timesteps to convergence")
+    compare_adoptions_by_homophily_index(activationStatsDFAllBinned, "activationsPerRound", runBaseFolder, "# of activations/timestep")
     
     '''
     drawSubPlotsToShowActivationTrends(activationStatsDFAll, homiphily_index, runBaseFolder, "polarity", "activeCounter")
@@ -142,9 +142,9 @@ def get_agg_results_for_attractive_articles(df, attractiveness_factor = 0):
     cat_df_attractie_agg = cat_df_grouped.mean()
     return cat_df_attractie_agg
 
-def compare_adoptions_by_homophily_index(activationStatsDFAllBinned, active_counter_category, runBaseFolder):
+def compare_adoptions_by_homophily_index(activationStatsDFAllBinned, active_counter_category, runBaseFolder, proxyName):
     plt.plot(activationStatsDFAllBinned["polarity"], activationStatsDFAllBinned[active_counter_category])
-    plt.title(f"polarity vs {active_counter_category}")
+    plt.title(f"Polarity vs {proxyName}")
     plt.xlabel("polarity")
     plt.ylabel(active_counter_category)
     plt.legend()
@@ -195,7 +195,7 @@ def analyzeNetworkDynamics(activationDynamicsStatsAll, homiphily_index, runBaseF
     
     plt.xlabel("iterations")
     plt.ylabel("number of active Nodes")
-    plt.title("Activation dynamics over iterations for different polarity values (diffusion trend)")
+    plt.title("Activation dynamics over iterations for different polarities (diffusion trend)")
     plt.legend()
     plt.savefig(os.path.join(runBaseFolder, "activationDynamics.png"))
     plt.show()

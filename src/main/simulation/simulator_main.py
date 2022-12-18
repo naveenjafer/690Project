@@ -10,14 +10,17 @@ from src.main.network.uniformNetwork import generateNetwork
 from src.main.newsArticles.articleGenerator import generateArticles
 from src.main.network.articleSampler import sameInclinationSampler, staggeredInclinationSampler
 from src.main.simulation.simulate_rounds import roundsSimulator
+from src.main.simulation.simulate_rounds_baseline import roundsSimulatorBaseline
+from src.main.simulation.simulate_rounds_weighted_threshold import roundsSimulatorWeightedThreshold
 from src.main.analysis.endOfRoundAnalysis import analyzeHistograms, analyzeNetworkDynamics, analyzeHistogramsAggregated, plotBoxPlotOfActivations  
 import networkx as nx
 import matplotlib.pyplot as plt
 import datetime
+import argparse
 
 NUMBER_OF_RUNS = 1
 
-def networkCreator():
+def networkCreator(args):
     # generate network
     dateString = datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
     #quit(1)
@@ -59,11 +62,28 @@ def networkCreator():
 
         samplers = staggeredInclinationSampler(nodeGraph, articleList)
 
-        activationDynamicsStats, activationStats, p_avgs, p_lists  = roundsSimulator(
-            nodeGraph,
-            articleList,
-            samplers
-        )
+        if args.algoType == "baseline":
+            activationDynamicsStats, activationStats, p_avgs, p_lists  = roundsSimulatorBaseline(
+                nodeGraph,
+                articleList,
+                samplers
+            )
+
+        elif args.algoType == "threshold":
+            activationDynamicsStats, activationStats, p_avgs, p_lists  = roundsSimulator(
+                nodeGraph,
+                articleList,
+                samplers
+            )
+        
+        elif args.algoType == "weighted_threshold":
+            activationDynamicsStats, activationStats, p_avgs, p_lists  = roundsSimulatorWeightedThreshold(
+                nodeGraph,
+                articleList,
+                samplers
+            )
+
+
         p_avgsAll.append(p_avgs)
         p_listsAll += p_lists
         activationStatsAll.append(activationStats)
@@ -73,10 +93,9 @@ def networkCreator():
     plotBoxPlotOfActivations(p_listsAll)
     #analyzeHistograms(activationStatsAll[0])
 
-    #analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
+    analyzeHistogramsAggregated(activationStatsAll, consts.HOMOPHILY_INDEX,  os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
     analyzeNetworkDynamics(activationDynamicsStatsAll, consts.HOMOPHILY_INDEX, os.path.join(consts.DATA_SIMULATION_FOLDER, dateString))
     return networkFolder, articleList
-
 
 def visualize_network(network_path):
     G = nx.read_gml(network_path)
@@ -86,6 +105,11 @@ def visualize_network(network_path):
     plt.show()
 
 if __name__ == "__main__":
-    networkFolder,  article_list = networkCreator()
+    parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
+    parser.add_argument('--algoType', choices={"baseline", "threshold", "weighted_threshold"}, type=str, default="threshold", metavar='N', help='the options with which simulate rounds needs to run')
+    
+    args = parser.parse_args()
+
+    networkFolder,  article_list = networkCreator(args)
     # visualize graph
     visualize_network(os.path.join(networkFolder, consts.NETWORK_ORIGINAL_FILENAME))
