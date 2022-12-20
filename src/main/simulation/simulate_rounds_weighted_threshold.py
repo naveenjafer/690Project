@@ -46,7 +46,11 @@ def roundsSimulatorWeightedThreshold(nodeGraph, articleList, samplers):
 
                 # start of calculating P_n 
                 P_n = calculate_p_n_mode_1(activationStateGetter, nodeGraphRound, nodeIndex, polIncGetter, weightageCongruentGetter, weightageNonCongruentGetter)
+                
                 # end of calculating P_n
+                if P_n == 0:
+                    # implies that this node is not exposed to this article
+                    continue
                 p_n_avg += P_n
                 # start of calculating P_p
                 P_p = calculate_p_p_mode_1(article, polIncGetter, nodeIndex)
