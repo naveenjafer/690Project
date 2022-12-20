@@ -46,8 +46,15 @@ def staggeredInclinationSampler(nodeGraph, articleList):
         assert output >= int(consts.ARTICLE_SAMPLER_COUNT/2) and output <= consts.ARTICLE_SAMPLER_COUNT
 
         samplerNodesBuilder = []
-        samplerNodesBuilder += random.sample(cat_0_nodes, output)
-        samplerNodesBuilder += random.sample(cat_1_nodes, consts.ARTICLE_SAMPLER_COUNT - output)
+        if article["political_inclination"] == consts.INCLINATIONS[0]:
+            correct_cluster = cat_0_nodes
+            other_cluster = cat_1_nodes
+        else:
+            correct_cluster = cat_1_nodes
+            other_cluster = cat_0_nodes
+
+        samplerNodesBuilder += random.sample(correct_cluster, output)
+        samplerNodesBuilder += random.sample(other_cluster, consts.ARTICLE_SAMPLER_COUNT - output)
         
         samplerNodesList.append(samplerNodesBuilder)
     #quit(1)
