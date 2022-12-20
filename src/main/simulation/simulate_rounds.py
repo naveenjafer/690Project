@@ -49,7 +49,7 @@ def roundsSimulator(nodeGraph, articleList, samplers):
                 # end of calculating P_n
                 p_n_avg += P_n
                 # start of calculating P_p
-                P_p = calculate_p_p_mode_2(article, polIncGetter, nodeIndex)
+                P_p = calculate_p_p_mode_1(article, polIncGetter, nodeIndex)
                 # end of calculating P_p
                 p_p_avg += P_p
 
